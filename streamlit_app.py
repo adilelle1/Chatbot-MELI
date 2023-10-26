@@ -10,21 +10,20 @@ with st.sidebar:
     ''':handshake:'''
     st.title('Chatbot Meli')
     if ('EMAIL' in st.secrets) and ('PASS' in st.secrets):
-        st.success('HuggingFace Login credentials already provided!', icon='✅')
+        st.success('Ya recibimos tus credenciales de HuggingFace!', icon='✅')
         hf_email = st.secrets['EMAIL']
-        hf_pass = st.secrets['PASS']
+        hf_pass = st.secrets['PASSWORD']
     else:
         hf_email = st.text_input('Enter E-mail:', type='password')
         hf_pass = st.text_input('Enter password:', type='password')
         if not (hf_email and hf_pass):
-            st.warning('Please enter your credentials!', icon='⚠️')
+            st.warning('Por favor ingresa tus credenciales!', icon='⚠️')
         else:
-            st.success('Proceed to entering your prompt message!', icon='👉')
-    st.markdown('📖 Learn how to build this app in this [blog](https://blog.streamlit.io/how-to-build-an-llm-powered-chatbot-with-streamlit/)!')
+            st.success('Listo! Comienza a conversar con Meli, tu asistente', icon='👉')
     
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": "How may I help you?"}]
+    st.session_state.messages = [{"role": "assistant", "content": f"Hola! Soy Meli 	{''':robot_face:'''}, cómo puedo ayudarte?"}]
 
 # Display chat messages
 for message in st.session_state.messages:
@@ -49,7 +48,7 @@ if prompt := st.chat_input(disabled=not (hf_email and hf_pass)):
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
+        with st.spinner(f"Pensando...{''':thinking_face:'''}"):
             response = generate_response(prompt, hf_email, hf_pass) 
             st.write(response) 
     message = {"role": "assistant", "content": response}
