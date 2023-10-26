@@ -3,12 +3,11 @@ from hugchat import hugchat
 from hugchat.login import Login
 
 # App title
-st.set_page_config(page_title="Chatbot Meli")
+st.set_page_config(page_title=f"{''':handshake:'''}Chatbot Meli{''':handshake:'''}")
 
 # Hugging Face Credentials
 with st.sidebar:
-    ''':handshake:'''
-    st.title('Chatbot Meli')
+    st.title(f"{''':handshake:'''}Chatbot Meli{''':handshake:'''}")
     if ('EMAIL' in st.secrets) and ('PASS' in st.secrets):
         st.success('Ya recibimos tus credenciales de HuggingFace!', icon='✅')
         hf_email = st.secrets['EMAIL']
