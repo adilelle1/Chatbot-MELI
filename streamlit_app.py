@@ -8,9 +8,11 @@ st.set_page_config(page_title=f"{''':handshake:'''} Chatbot Meli {''':handshake:
 # Hugging Face Credentials
 with st.sidebar:
     st.title(f"{''':handshake:'''} Chatbot Meli {''':handshake:'''}")
+    st.write("⚠️ You need to login in Hugging Face to use this app. You can register [here](https://huggingface.co/join).")
     if ('EMAIL' in st.secrets) and ('PASS' in st.secrets):
         st.success('Ya recibimos tus credenciales de HuggingFace!', icon='✅')
-        hf_email = st.secrets['EMAIL']
+        hf_email = st.text_input('Enter E-mail:')
+        #hf_email = st.secrets['EMAIL']
         hf_pass = st.secrets['PASSWORD']
     else:
         hf_email = st.text_input('Enter E-mail:', type='password')
@@ -19,6 +21,9 @@ with st.sidebar:
             st.warning('Por favor ingresa tus credenciales!', icon='⚠️')
         else:
             st.success('Listo! Comienza a conversar con Meli, tu asistente', icon='👉')
+    
+
+
     
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
