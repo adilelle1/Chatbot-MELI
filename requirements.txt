@@ -10,4 +10,5 @@ streamlit_option_menu==0.3.2
 plotly.express==0.4.1
 wordcloud==1.9.2
 nltk==3.8.1
+hugchat==0.3.7
 
