@@ -876,15 +876,15 @@ elif selected == 'Conclusiones':
     st.title("Conclusiones")
     st.header("KPIs de medición")
     st.markdown(""" 
-                - Tasa de Conversión (Conversion Rate): Proporción de usuarios que realizaron una compra en comparación con el total de usuarios que interactuaron con el chatbot.
-                - Ingresos Generados: Ingresos directamente atribuibles a las recomendaciones del chatbot. 
-                - Interacción Promedio del Usuario: Cantidad de interacciones que un usuario tiene con el chatbot durante una sesión.
-                - Tiempo de Respuesta: Rapidez con la que el chatbot responde a las consultas de los usuarios. 
-                - Retención de Usuarios: Frecuencia con la que los usuarios regresan al chatbot para obtener más recomendaciones. 
-                - Análisis de sentimiento: Análisis usndo el feedback de los usuarios después de interactuar con el chatbot. 
-                - Número de Transacciones por Usuario: Cantidad de transacciones realizadas por cada usuario. 
-                - Porcentaje de Abandono: Cantidad de usuarios que abandonan la interacción con el chatbot antes de completar una transacción.
-                - Costo por Adquisición (CPA): Si hay inversión en la promoción del chatbot, medir cuánto cuesta adquirir un nuevo cliente a través del chatbot.
+                - **Tasa de Conversión** (Conversion Rate): Proporción de usuarios que realizaron una compra en comparación con el total de usuarios que interactuaron con el chatbot.
+                - **Ingresos Generados**: Ingresos directamente atribuibles a las recomendaciones del chatbot. 
+                - **Interacción Promedio** del Usuario: Cantidad de interacciones que un usuario tiene con el chatbot durante una sesión.
+                - **Tiempo de Respuesta**: Rapidez con la que el chatbot responde a las consultas de los usuarios. 
+                - **Retención de Usuarios**: Frecuencia con la que los usuarios regresan al chatbot para obtener más recomendaciones. 
+                - **Análisis de sentimiento**: Análisis usndo el feedback de los usuarios después de interactuar con el chatbot. 
+                - **Número de Transacciones por Usuario**: Cantidad de transacciones realizadas por cada usuario. 
+                - **Porcentaje de Abandono**: Cantidad de usuarios que abandonan la interacción con el chatbot antes de completar una transacción.
+                - **Costo por Adquisición (CPA)**: Si hay inversión en la promoción del chatbot, medir cuánto cuesta adquirir un nuevo cliente a través del chatbot.
             """)      
 
     st.header("Perspectivas futuras")
