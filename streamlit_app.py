@@ -1,3 +1,15 @@
+"""
+Este es el archivo en el que se basa la aplicación web que utilicé en la presentación.
+A partir de streamlit, un framework para crear apps usando python, resulta bastante sencillo y da una interfaz muy agradable.
+
+Dentro del código se encuentran funciones importadas de otros archivos para no sobrecargar el script.
+
+Lamento no haber podido desplegar correctamente la app, usando "streamlit run streamlit_app.py" en la command line podran correr 
+la app en su entorno local y probar el chatbot y los sistemas de recomendacion.
+
+"""
+##############################################################################################
+
 import time
 import random
 import string
@@ -29,7 +41,9 @@ from funciones.graficos import *
 
 
 
-#1. import de dataseta
+
+
+#1. importar datasets
 # dataset de ventas Amazon para analisis del mercado
 data_amazon = pd.read_csv(r'data\amazon_sales.csv')
 
@@ -179,15 +193,7 @@ elif selected == 'Sistema de recomendación':
 
         st.header("Tipos de recomendaciones")
         st.image(r"imagenes\recommenders.png")
-        #st.write("Principalmente hay 6 tipos de sistemas de recomendación:")
-        #st.markdown("- **Sistemas basados en popularidad:** Funcionan recomendando elementos vistos y comprados por la mayoría de las personas y que tienen altas calificaciones. No son recomendaciones personalizadas.")
-        #st.markdown("- **Modelo basado en clasificación:** Funciona comprendiendo las características del usuario y aplicando el algoritmo de clasificación para decidir si el usuario está interesado o no en el producto.")
-        #st.markdown("- **Recomendaciones basadas en contenido:** Se basa en la información sobre el contenido del artículo en lugar de en las opiniones del usuario. La idea principal es que si al usuario le gusta un artículo, entonces le gustará el 'otro' artículo similar.")
-        #st.markdown("- **Filtrado colaborativo:** Se basa en la suposición de que a las personas les gustan productos similares a otros que ya les gustaron, y productos que son valorados por otras personas con gustos similares. \
-        #            Principalmente hay dos tipos: \n\t\ta) Usuario-Usuario \n\t\tb) Artículo-Artículo")
-        #st.markdown("- **Enfoques híbridos:** Este enfoque combina filtrado colaborativo, filtrado basado en contenido y otros enfoques.")
-        #st.markdown("- **Minería de reglas de asociación:** Las reglas de asociación capturan las relaciones entre elementos basadas en sus patrones de co-ocurrencia en las transacciones.")
-
+       
         st.header("Información del dataset:")
         st.write("A modo de ejemplo, se utiliza un conjunto de datos de pocas dimensiones donde se tiene información de usuarios y la forma en que 'ratearon' diferentes productos.")
         st.write("Por otro lado, se hace un recorte del dataset para tomar solo aquellos usuarios con más de 50 valoraciones de productos. Esto le dará más robustez al análisis y nos permite trabajar con un dataset de 125 mil registros (antes 7 millones).")
@@ -199,10 +205,6 @@ elif selected == 'Sistema de recomendación':
                         labels={'rating': 'Rating', 'count': 'Count'},
                         color_discrete_sequence=['skyblue'])
         st.plotly_chart(fig)
-
-
-
-
 
 
         ####### PRIMERA RECOM ##########
@@ -243,8 +245,6 @@ elif selected == 'Sistema de recomendación':
                 st.warning('Por favor ingresa un numero entero.')
             except IndexError:
                 st.warning('Por favor ingresa un numero entero.')
-
-
 
 
 
@@ -342,9 +342,6 @@ elif selected == 'Sistema de recomendación':
 
 
 
-
-
-
         ####### TERCERA RECOM ##########
         st.subheader("Modelo basado en Collaborative Filtering: Singular Value Decomposition")
         st.write("Como la matriz de interacción para este conjunto de datos es altamente dispersa (más del 99% de los valores son 0).\
@@ -398,8 +395,6 @@ elif selected == 'Sistema de recomendación':
                 user_id_2_int = int(user_id_2)
                 prod_recomen_pred_rating = recommend_items(user_id_2_int, final_ratings_sparse, preds_matrix,5)
                 st.write('**Productos recomendados en base a predicción de rating:**')
-                #for prod in prod_recomen_user_sim:
-                #    st.write(f'- **{prod}**')
                 st.dataframe(prod_recomen_pred_rating['user_rating_predictions'].head(10))
                 st.subheader("Evaluación de la predicción")
                 st.markdown("Se toman los valores reales (ratings) y se calcula un promedio de cada artiuclo.")
@@ -423,9 +418,6 @@ elif selected == 'Sistema de recomendación':
 
         
 
-
-
-
     if __name__ == '__main__':
         sistemas_de_recomendacion()
 
@@ -445,7 +437,6 @@ elif selected == 'Chatbot MELI':
             st.session_state.messages = []
             st.session_state.user_inputs = []
 
-        # Display chat messages from history on app rerun
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
@@ -457,7 +448,7 @@ elif selected == 'Chatbot MELI':
                     st.markdown(prompt)
                 user_input.append(prompt)
 
-        # Initialize questions for the sales conversation
+        # Initialize questions 
         sales_questions = [
             "Hola! Soy Marquitos-G 😎, qué producto estás buscando?",
             "Qué tipo de zapatillas estás buscando? (running, futbol, tenis, basquet, etc.)",
@@ -467,52 +458,50 @@ elif selected == 'Chatbot MELI':
         ]
 
 
-        # Check if the conversation is at the beginning
+        # chequear si la conversacion esta al principio
         if not st.session_state.messages:
-            # Display the initial random response
+            # Mostrar primer mensaje
             assistant_response = random.choice(
                 [
                     "Hola! Soy Marquitos-G 😎, qué producto estás buscando?"
                 ]
             )
             
-
             with st.chat_message("assistant"):
                 message_placeholder = st.empty()
                 full_response = ""
-                # Simulate typing the initial response
+                # Typeo del bot con formato
                 for chunk in assistant_response.split():
                     full_response += chunk + " "
                     time.sleep(0.05)
-                    # Add a blinking cursor to simulate typing
+                    # blinking cursor 
                     message_placeholder.markdown(full_response + "▌")
                 message_placeholder.markdown(full_response)
-            # Add assistant response to chat history
+            # guardo la respuesta en el chat history
             st.session_state.messages.append({"role": "assistant", "content": full_response})
         else:
-            # Continue the sales conversation by asking questions
+            # Continua preguntando
             if len(st.session_state.messages) < len(sales_questions) * 2:
-                # Calculate the index of the current question
+                # Calcular el index de la rta actual
                 question_index = len(st.session_state.messages) // 2
-                # Display the next question
+                # Mostrar pregunta siguiente
                 with st.chat_message("assistant"):
                     message_placeholder = st.empty()
                     full_response = ""
-                    # Simulate typing the question
+                   
                     for chunk in sales_questions[question_index].split():
                         full_response += chunk + " "
                         time.sleep(0.05)
-                        # Add a blinking cursor to simulate typing
+                        # blinking cursor 
                         message_placeholder.markdown(full_response + "▌")
                     message_placeholder.markdown(full_response)
-                # Add assistant question to chat history
+                # Agrego al chat history
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
                 
                 
             else:
-                # If all questions have been asked, end the conversation
+                # si se preguntaron todas las preg, damos scrapeo y fin de conversacion
                 with st.chat_message('assistant'):
-                
                     with st.spinner(f"Buscando...🤔"):
                         user_input_string = " ".join(st.session_state.user_inputs)
                         scraped_data = scrape_and_return_data(user_input_string)
@@ -552,17 +541,17 @@ elif selected == 'Chatbot MELI':
                 with st.chat_message("assistant"):
                     st.markdown("Espero que estos productos te sean de utilidad! Querés buscar algo más?")
                     
-                    # Add buttons for user response
+                    # Boton para seguir o no
                     user_response = st.radio("Selecciona una opción:", ["No", "Sí"])
                     
                     if user_response == "No":
-                        # If user selects "No", end the conversation with a goodbye message
+                        # goodbye message
                         st.session_state.messages.append({"role": "user", "content": user_response})
                         st.session_state.messages.append({"role": "assistant", "content": "¡Hasta luego! 👋"})
                         st.markdown("¡Hasta luego! 👋")
                         
                     elif user_response == "Sí":
-                        # If user selects "Sí", reset the conversation
+                        # reset the conversation
                         st.session_state.messages = []
                         st.markdown("¡Perfecto! Comencemos de nuevo.")
                         
@@ -593,32 +582,32 @@ elif selected == 'Chatbot LLM':
                 else:
                     st.success('Listo! Comienza a conversar con Meli, tu asistente', icon='👉')
             st.markdown('📖 Learn how to build this app in this [blog](https://blog.streamlit.io/how-to-build-an-llm-powered-chatbot-with-streamlit/)!')
-            # Store LLM generated responses
+            # Guardar las rtas del LLM
         if "messages" not in st.session_state.keys():
             st.session_state.messages = [{"role": "assistant", "content": "How may I help you?"}]
 
-        # Display chat messages
+        # Mostrar mensajes
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.write(message["content"])
 
 
-        # Function for generating LLM response
+        # Generar LLM response
         def generate_response(prompt_input, email, passwd):
             # Hugging Face Login
             sign = Login(email, passwd)
             cookies = sign.login()
-            # Create ChatBot                        
+            # Crear ChatBot                        
             chatbot = hugchat.ChatBot(cookies=cookies.get_dict())
             return chatbot.chat(prompt_input)
 
-        # User-provided prompt
+        # User prompt
         if prompt := st.chat_input(disabled=not (hf_email and hf_pass)):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.write(prompt)
 
-        # Generate a new response if last message is not from assistant
+        # Generar nueva respuesta si el ultimo mensaje no es del asistente
         if st.session_state.messages[-1]["role"] != "assistant":
             with st.chat_message("assistant"):
                 with st.spinner("Thinking..."):
