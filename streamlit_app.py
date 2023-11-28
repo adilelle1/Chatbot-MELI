@@ -33,7 +33,7 @@ data_amazon = pd.read_csv(r'amazon_sales.csv')
 data_meli = pd.read_csv('meli.csv')
 
 # dataset para sistema de recomendacion
-data_recom = pd.read_csv('ratings_Electronics_corto.csv') 
+data_recom = pd.read_csv('ratings.csv') 
 data_recom.drop(columns='Unnamed: 0', inplace=True)
 
 
@@ -200,7 +200,7 @@ class Scraper:
 with st.sidebar:
     selected = option_menu(
         menu_title='Menu',
-        options=['Home', 'EDA', 'Sistema de recomendación','Chatbot MELI', 'Chatbot LLM'],
+        options=['Home', 'EDA', 'Sistema de recomendación','Chatbot MELI', 'Chatbot LLM', 'Conclusiones'],
     )
 
 
@@ -866,3 +866,38 @@ elif selected == 'Chatbot LLM':
 
     if __name__ == '__main__':
         chatbot_llm()
+
+
+#####################################################################################################################################
+
+
+# Pagina 5 = Conclusiones
+elif selected == 'Conclusiones':
+    st.title("Conclusiones")
+    st.header("KPIs de medición")
+    st.markdown(""" 
+                - Tasa de Conversión (Conversion Rate): Proporción de usuarios que realizaron una compra en comparación con el total de usuarios que interactuaron con el chatbot.
+                - Ingresos Generados: Ingresos directamente atribuibles a las recomendaciones del chatbot. 
+                - Interacción Promedio del Usuario: Cantidad de interacciones que un usuario tiene con el chatbot durante una sesión.
+                - Tiempo de Respuesta: Rapidez con la que el chatbot responde a las consultas de los usuarios. 
+                - Retención de Usuarios: Frecuencia con la que los usuarios regresan al chatbot para obtener más recomendaciones. 
+                - Análisis de sentimiento: Análisis usndo el feedback de los usuarios después de interactuar con el chatbot. 
+                - Número de Transacciones por Usuario: Cantidad de transacciones realizadas por cada usuario. 
+                - Porcentaje de Abandono: Cantidad de usuarios que abandonan la interacción con el chatbot antes de completar una transacción.
+                - Costo por Adquisición (CPA): Si hay inversión en la promoción del chatbot, medir cuánto cuesta adquirir un nuevo cliente a través del chatbot.
+            """)      
+
+    st.header("Perspectivas futuras")
+    st.markdown("""Para avanzar en el armado del producto final será necesario sortear los desafíos que apareceran cómo:""")
+    st.markdown("""
+                - Acuerdos de uso de datos de sitios web
+                - Escalabilidad del proyecto
+                - Costos de desarrollo
+                - Aspectos legales del uso de datos 
+                """)
+    st.markdown(""" 
+                Usando una tecnología de chatbot conversacional, la aplicación de técnicas de web scraping y sistemas de recomendación podrían representar un futuro prometedor en la mejora de la experiencia de compra en línea. 
+                Por otro lado, el potencial de crecimiento utilizando Modelos de Lenguaje Extenso brindan un gran horizonte de crecimiento para la solución \
+                 pensada en este proyecto, donde el usuario no solo recibiría respuestas automáticas creadas manualmente por los desarrolladores, sino que podría tener una conversación más real donde se le den recomendaciones de los mejores productos según diferentes fuentes de internet, ayuda personalizada según las últimas tendencias, o hasta incluso un juego de roles donde el modelo se pone en el lugar de un vendedor de zapatillas para mejorar la atención al cliente.
+                """)
+    
