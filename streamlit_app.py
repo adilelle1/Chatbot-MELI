@@ -25,21 +25,17 @@ import plotly.express as px
 import plotly.colors as colors
 
 
-
-
 #1. import de dataseta
-
 # dataset de ventas Amazon para analisis del mercado
-data_amazon = pd.read_csv(r'amazon_sales_dataset.csv')
-data_amazon = data_amazon[data_amazon.Week <= 41].copy()
+data_amazon = pd.read_csv(r'amazon_sales.csv')
 
 # dataset MELI
 data_meli = pd.read_csv('mercadolibre_scraped_data.csv', on_bad_lines='skip', delimiter=';')
 data_meli.drop(columns='Unnamed: 0', inplace=True)
 
 # dataset para sistema de recomendacion
-data_recom = pd.read_csv('nuevo_ratings.csv', header=None) 
-
+data_recom = pd.read_csv('ratings_Electronics_corto.csv') 
+data_recom.drop(columns='Unnamed: 0', inplace=True)
 
 
 # 2. SQL Analytics
@@ -215,43 +211,64 @@ with st.sidebar:
 # Pagina 1 = Home
 if selected == 'Home':
     st.title('E-commerce Chatbot')
-    st.write('Encontrá lo que estabas buscando.')
+    st.image("ecommerce.webp")
     st.header('Problemática y objetivos')
-    st.header("Problema 1: Sobrecarga de opciones y dificultad en la toma de decisiones")
+    st.subheader("Problema 1: 'Information Overload'")
     st.markdown("""
+                El concepto de "information overload" (sobrecarga de información) se refiere a la situación en la que una persona se ve abrumada por la cantidad de información disponible, lo que dificulta su capacidad para procesar y tomar decisiones de manera efectiva.
                 El exceso de información en el comercio electrónico puede abrumar a los compradores. 
-                Esto afecta negativamente la experiencia del cliente y puede llevar a no encontrar el producto adecuado.
     """)
+    st.markdown("""Algunos problemas que trae asociado son:
+                - Dificultad para tomar decisiones
+                - Fatiga mental
+                -Falta de claridad""")
 
+    st.markdown("Esto afecta negativamente la experiencia del cliente y por ende ser un costo para el vendedor, y puede llevar a no encontrar el producto adecuado.")
     # Problema 2: Impacto de la inflación y crisis económica en los precios
-    st.header("Problema 2: Impacto de la inflación y crisis económica en los precios")
+    st.subheader("Problema 2: Inflación y crisis económica")
     st.markdown("""
     La aceleración constante de precios a nivel global, especialmente en costos de envío, ha afectado a los comerciantes en línea, generando un aumento en los precios finales de los productos.
     """)
     st.image('inflacion.png')
+    
     # Problema 3: Exclusión de la población mayor en el comercio en línea
-    st.header("Problema 3: Exclusión de la población mayor en el comercio en línea")
+    st.subheader("Problema 3: Brecha generacional")
     st.markdown("""
-    La brecha generacional se manifiesta en la exclusión de adultos mayores del comercio en línea.
+                El avance tecnológico de los últimos años ha obligado a muchos a reconvertir sus hábitos, sin embargo muchas personas han quedado fuera de esta modernidad.
+                La brecha generacional se manifiesta en la exclusión de adultos mayores del comercio en línea y uso de otras tecnologías modernas.
     """)
     st.image('uso_amazon_edad.png')
 
     # Solución: Chatbot con Web Scraping
-    st.header("Solución: Chatbot con Web Scraping")
+    st.header("**Solución**: Chatbot conversacional con Web Scraping")
     st.markdown("""
-    Para abordar estos problemas, hemos desarrollado un chatbot que utiliza web scraping para simplificar la experiencia de compra en línea.
-    """)
+    Para abordar estos problemas, surge la idea de desarrollar un producto que utilice tecnologías de **Chatbot**, **LLM** y **Web scraping**.""")
+    st.subheader("**Chatbot**")
+    st.markdown("""Un chatbot es un programa de computadora diseñado para interactuar con usuarios a través de conversaciones, simulando la forma en que los humanos se comunican. 
+                Utiliza tecnologías como IA y NLP para comprender y responder a preguntas, realizar tareas específicas o proporcionar información en tiempo real. 
+                Los chatbots se implementan en plataformas de mensajería, sitios web u otras interfaces, ofreciendo una experiencia de usuario interactiva y automatizada. """)
+    st.image('Chatbot3.png')
+    st.subheader("**Web Scraping**")
+    st.markdown("""El web scraping es una técnica de extracción de datos que consiste en recopilar información de sitios web de manera automatizada. 
+                Utiliza programas o scripts para navegar por las páginas web, analizar su estructura HTML, y extraer la información deseada, como texto, imágenes o enlaces. 
+                Esta técnica permite obtener datos de manera eficiente sin necesidad de acceder manualmente a cada página.""")
+    st.image("web_scrap.jpeg")
+    st.subheader("**LLM**")
+    st.markdown("""Los "large language models" (LLM) se refieren a modelos de inteligencia artificial diseñados para entender y generar lenguaje natural en gran escala. 
+                Estos modelos son entrenados en enormes cantidades de datos textuales y utilizan arquitecturas de aprendizaje profundo, como las redes neuronales, para aprender patrones complejos en el lenguaje.""")
+    st.image('LLM.png')
 
 
-
-
+    st.header("Business Model Canvas")
+    st.image("BMCanvas.png")
 
 
     st.header('Dataset')
-    st.write('El conjunto de datos utilizado, es un subset de datos de la base de la página web [Goodreads](https://www.goodreads.com/).')
-
-    st.write('Para este proyecto se utiliza una base de 6.000 libros y 981.756 puntuaciones que realizaron usuarios acerca de los mismos.')
-    st.write("A continuación podemos ver cómo se componen los set de datos utilizados:")
+    st.write('Los conjuntos de datos utilizados para este proyecto son 3:')
+    st.markdown('- Amazon sales 2019-21 = evolucion de las ventas de amazon en Reino Unido')
+    st.markdown('- Ratings: set de datos de ratings de productos por usuarios')
+    st.markdown('- Mercado Libre: Web Scraping')
+    st.markdown('[Github](https://www.goodreads.com/)')
     #st.dataframe(data_recom.head())
     #st.dataframe(data_ratings.head())
 
@@ -361,7 +378,7 @@ elif selected == 'EDA':
 
         st.subheader('Evolución mensual de las ventas')
         crecimiento_mensual(monthly_sales_growth)
-        crecimiento_mensual_anio(monthly_sales_comparison)
+        #crecimiento_mensual_anio(monthly_sales_comparison)
 
         st.subheader('Evolución de las ventas en el tiempo')
         plot_aggregated_weekly_sales(data_amazon)
@@ -383,7 +400,6 @@ elif selected == 'EDA':
 
 
 #####################################################################################################################################
-
 
 # Pagina 3 = Sistema de recom
 elif selected == 'Sistema de recomendación':
@@ -741,7 +757,6 @@ elif selected == 'Chatbot MELI':
                         user_input_string = " ".join(st.session_state.user_inputs)
                         scraper = Scraper(user_input_string)
                         scraper.scraping()
-                        # Filter the data_recom based on user preferences
                         prod1 = scraper.data_recom.iloc[0]
                         prod2 = scraper.data_recom.iloc[1]
                         prod3 = scraper.data_recom.iloc[2]
