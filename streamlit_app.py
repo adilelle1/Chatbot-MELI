@@ -23,180 +23,25 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import plotly.colors as colors
+from funciones.sql_analytics import create_and_query_sql_analytics
+from funciones.scraper import scrape_and_return_data
+from funciones.graficos import *
+
 
 
 #1. import de dataseta
 # dataset de ventas Amazon para analisis del mercado
-data_amazon = pd.read_csv(r'amazon_sales.csv')
+data_amazon = pd.read_csv(r'data\amazon_sales.csv')
 
 # dataset MELI
-data_meli = pd.read_csv('meli.csv')
+data_meli = pd.read_csv(r'data\meli.csv')
 
 # dataset para sistema de recomendacion
-data_recom = pd.read_csv('ratings.csv') 
+data_recom = pd.read_csv(r'data\ratings.csv') 
 data_recom.drop(columns='Unnamed: 0', inplace=True)
 
 
-# 2. SQL Analytics
-# Creo una bbdd en memoria usando sqlite
-conn = sqlite3.connect(':memory:')
-# Guardo el df en una tabla sql
-data_amazon.to_sql('sales_data_amazon', conn, index=False)
-# busco el crecimiento porcentual de la ventas mes a mes
-query1 = """
-WITH MonthlySales AS (
-    SELECT
-        Year,
-        Month,
-        SUM(Weekly_Sales) AS Monthly_Sales,
-        LAG(SUM(Weekly_Sales)) OVER (ORDER BY Year, Month) AS Last_Month_Sales
-    FROM sales_data_amazon
-    GROUP BY Year, Month
-)
-
-SELECT
-    Year,
-    Month,
-    Monthly_Sales,
-    Last_Month_Sales,
-    CASE
-        WHEN Last_Month_Sales IS NULL THEN 0  -- To handle the first month where there is no last month sales
-        ELSE (Monthly_Sales - Last_Month_Sales) / Last_Month_Sales * 100
-    END AS Monthly_Growth_Percentage
-FROM MonthlySales;
-"""
-# Crecimiento anio a anio para cada mes 
-query2 = """
-WITH MonthlySales AS (
-    SELECT
-        Year,
-        Month,
-        SUM(Weekly_Sales) AS Monthly_Sales
-    FROM sales_data_amazon
-    GROUP BY Year, Month
-)
-
-SELECT
-    m1.Year ,
-    m1.Month,
-    m1.Monthly_Sales AS Current_Monthly_Sales,
-    m2.Year AS Previous_Year,
-    m2.Monthly_Sales AS Previous_Monthly_Sales,
-    CASE
-        WHEN m2.Monthly_Sales IS NULL THEN 0  -- To handle the first month where there is no previous year sales
-        ELSE (m1.Monthly_Sales - m2.Monthly_Sales) / m2.Monthly_Sales * 100
-    END AS Monthly_Growth_Percentage
-FROM MonthlySales m1
-LEFT JOIN MonthlySales m2 ON m1.Month = m2.Month AND m1.Year = m2.Year + 1
-ORDER BY m1.Year, m1.Month;
-"""
-# evolucion mes a mes
-monthly_sales_growth = pd.read_sql(query1, conn)
-monthly_sales_growth['Year']= monthly_sales_growth['Year'].astype('str')
-
-# evolucion mensual anio a anio
-monthly_sales_comparison = pd.read_sql(query2, conn)
-monthly_sales_comparison['Year']= monthly_sales_comparison['Year'].astype('str')
-conn.close()
-
-
-#3. Clase Scraper para web scraping
-class Scraper:
-    def __init__(self, user_input):
-        self.user_input = user_input
-        self.data_recom = pd.DataFrame()
-
-    def clean_user_input(self):
-        # Descargar los recursos necesarios de la libreria NLTK
-        nltk.download('stopwords')
-        nltk.download('punkt')
-
-        # Convertir texto a minusculas
-        text = self.user_input.lower()
-
-        # Quitar puntuación
-        text = text.translate(str.maketrans("", "", string.punctuation))
-
-        # Tokenizar el texto
-        tokens = word_tokenize(text)
-
-        # Quitar stopwords
-        stop_words = set(stopwords.words('english'))
-        tokens = [word for word in tokens if word.lower() not in stop_words]
-
-        # Join the tokens back into a cleaned text
-        cleaned_text = " ".join(tokens)
-
-        return cleaned_text
-
-    def prepare_user_input(self):
-        cleaned_name = self.user_input.replace(" ", "-").lower()
-        return cleaned_name
-
-    def scraping(self):
-
-        cleaned_text = self.clean_user_input()
-        prep_clean_text = self.prepare_user_input()
-        urls = ['https://listado.mercadolibre.com.ar/' + prep_clean_text]
-
-        page_number = 50
-        for i in range(0, 100, 50):
-            urls.append(f"https://listado.mercadolibre.com.ar/{prep_clean_text}_Desde_{page_number + 1}_NoIndex_True")
-            page_number += 50
-
-        # Lista para almacenar lo escrapeado
-        scraped_data = []
-
-        # Iterar URL
-        for i, url in enumerate(urls, start=1):
-            # Traer el HTML de la pagina
-            response = requests.get(url)
-            soup = BeautifulSoup(response.text, 'html.parser')
-
-            # agarro los posteos
-            content = soup.find_all('li', class_='ui-search-layout__item')
-
-            # sobre cada posteo se itera para traer el contenido
-            for post in content:
-                title = post.find('h2').text
-                price = post.find('span', class_='andes-money-amount__fraction').text
-                post_link = post.find("a")["href"]
-
-                try:
-                    brand = post.find('span', class_= 'ui-search-item__brand-discoverability ui-search-item__group__element').text
-                except:
-                    brand = '-'
-
-                try:
-                    img_link = post.find("img")["data_recom-src"]
-                except:
-                    img_link = post.find("img")["src"]
-
-                try:
-                    post_rvw = post.find("span", class_='ui-search-reviews__rating-number').text
-                except:
-                    post_rvw = '0'
-
-                try:
-                    post_rvw_amount = post.find("span", class_='ui-search-reviews__amount').text
-                except:
-                    post_rvw_amount = '-'
-
-                post_data = {
-                    "title": title,
-                    "brand": brand,
-                    "price": price,
-                    "post link": post_link,
-                    "image link": img_link,
-                    "review": float(post_rvw),
-                    "review amount": post_rvw_amount 
-                }
-                scraped_data.append(post_data)
-
-        self.data_recom = pd.DataFrame(scraped_data)
-
-
-#5. Sidebar
+#2. Sidebar
 with st.sidebar:
     selected = option_menu(
         menu_title='Menu',
@@ -210,7 +55,7 @@ with st.sidebar:
 # Pagina 1 = Home
 if selected == 'Home':
     st.title('E-commerce Chatbot')
-    st.image("ecommerce.webp")
+    st.image(r"imagenes\ecommerce.webp")
     st.header('Problemática y objetivos')
     st.subheader("Problema 1: 'Information Overload'")
     st.markdown("""
@@ -228,7 +73,7 @@ if selected == 'Home':
     st.markdown("""
     La aceleración constante de precios a nivel global, especialmente en costos de envío, ha afectado a los comerciantes en línea, generando un aumento en los precios finales de los productos.
     """)
-    st.image('inflacion.png')
+    st.image(r'imagenes\inflacion.png')
     
     # Problema 3: Exclusión de la población mayor en el comercio en línea
     st.subheader("Problema 3: Brecha generacional")
@@ -236,7 +81,7 @@ if selected == 'Home':
                 El avance tecnológico de los últimos años ha obligado a muchos a reconvertir sus hábitos, sin embargo muchas personas han quedado fuera de esta modernidad.
                 La brecha generacional se manifiesta en la exclusión de adultos mayores del comercio en línea y uso de otras tecnologías modernas.
     """)
-    st.image('uso_amazon_edad.png')
+    st.image(r'imagenes\uso_amazon_edad.png')
 
     # Solución: Chatbot con Web Scraping
     st.header("**Solución**: Chatbot conversacional con Web Scraping")
@@ -246,20 +91,20 @@ if selected == 'Home':
     st.markdown("""Un chatbot es un programa de computadora diseñado para interactuar con usuarios a través de conversaciones, simulando la forma en que los humanos se comunican. 
                 Utiliza tecnologías como IA y NLP para comprender y responder a preguntas, realizar tareas específicas o proporcionar información en tiempo real. 
                 Los chatbots se implementan en plataformas de mensajería, sitios web u otras interfaces, ofreciendo una experiencia de usuario interactiva y automatizada. """)
-    st.image('Chatbot3.png')
+    st.image(r'imagenes\Chatbot3.png')
     st.subheader("**Web Scraping**")
     st.markdown("""El web scraping es una técnica de extracción de datos que consiste en recopilar información de sitios web de manera automatizada. 
                 Utiliza programas o scripts para navegar por las páginas web, analizar su estructura HTML, y extraer la información deseada, como texto, imágenes o enlaces. 
                 Esta técnica permite obtener datos de manera eficiente sin necesidad de acceder manualmente a cada página.""")
-    st.image("web_scrap.jpeg")
+    st.image(r"imagenes\web_scrap.jpeg")
     st.subheader("**LLM**")
     st.markdown("""Los "large language models" (LLM) se refieren a modelos de inteligencia artificial diseñados para entender y generar lenguaje natural en gran escala. 
                 Estos modelos son entrenados en enormes cantidades de datos textuales y utilizan arquitecturas de aprendizaje profundo, como las redes neuronales, para aprender patrones complejos en el lenguaje.""")
-    st.image('LLM.png')
+    st.image(r'imagenes\LLM.png')
 
 
     st.header("Business Model Canvas")
-    st.image("BMCanvas.png")
+    st.image(r"imagenes\BMCanvas.png")
 
 
     st.header('Dataset')
@@ -278,92 +123,11 @@ if selected == 'Home':
 # Pagina 2 = Graficos
 elif selected == 'EDA':
     color_palette = colors.qualitative.Light24
-    
-    def ventas_por_anio(data_amazon):
-        total_sales_by_year = data_amazon.groupby('Year')['Weekly_Sales'].sum().reset_index()
-        total_sales_by_year = total_sales_by_year[total_sales_by_year['Weekly_Sales'] > 0]
-        fig = px.bar(total_sales_by_year, x='Year', y='Weekly_Sales',
-                    labels={'Weekly_Sales': 'Ventas', 'Year': 'Año'},
-                    title='Ventas totales por año',
-                    text='Weekly_Sales',  
-                    height=500,  
-                    )
-        fig.update_layout(xaxis=dict(tickmode='array', tickvals=total_sales_by_year['Year'].tolist()))
-        st.plotly_chart(fig)
-    
     st.set_option('deprecation.showPyplotGlobalUse', False)
-    def crecimiento_mensual(df1):
-        fig = px.bar(df1, x='Month', y='Monthly_Growth_Percentage', color='Year',
-                    labels={'Monthly_Growth_Percentage': 'Porcentaje de crecimiento mensual', 'Year': 'Año'},
-                    title='Crecimiento mensual mes a mes',
-                    facet_col='Year',  
-                    facet_col_wrap=3,  
-                    height=500 
-                    )
-        fig.update_layout(title_font=dict(size=18))  
-        st.plotly_chart(fig)
-
-    def crecimiento_mensual_anio(df2):
-        df2 = df2[df2['Year'] != 2019]
-        fig = px.bar(df2, x='Month', y='Monthly_Growth_Percentage', color='Year',
-                    labels={'Monthly_Growth_Percentage': 'Porcentaje de crecimiento mensual', 'Year': 'Año'},
-                    title='Crecimiento mensual año a año',
-                    height=500  
-                    )
-        fig.update_layout(title_font=dict(size=18))  
-        st.plotly_chart(fig)
-
-    def plot_aggregated_weekly_sales(data_amazon):
-        # Agrupo para tener la suma total de las ventas por fecha
-        weekly_sales = data_amazon.groupby('Date')['Weekly_Sales'].sum()
-        # Ordeno y pongo como índice la fecha
-        weekly_sales = weekly_sales.reset_index().sort_values('Date')
-        fig = px.line(weekly_sales, x='Date', y='Weekly_Sales',
-                    labels={'Weekly_Sales': 'Ventas', 'Date': 'Fecha'},
-                    title='Evolución de las venta en el tiempo')
-        st.plotly_chart(fig)
-
-    def plot_monthly_sales_regression(data_amazon):
-        # Agrupo ventas por mes y año
-        monthly_sales = data_amazon.groupby(['Year', 'Month'])['Weekly_Sales'].sum().reset_index()
-        # Hago numérico el mes para que mantenga el orden de mes por año
-        monthly_sales['Numeric_Month'] = range(1, len(monthly_sales) + 1)
-        fig = px.scatter(monthly_sales, x='Numeric_Month', y='Weekly_Sales', trendline='ols', labels={'Weekly_Sales': 'Ventas', 'Numeric_Month': 'Mes'},
-                        title='Regresión lineal - ventas mensuales')
-        fig.update_traces(line_shape='linear', line=dict(color='red'))
-        st.plotly_chart(fig)
-
-    golden_color = ['#FFD700']
-    def show_price_distribution(data):
-        fig = px.histogram(data, x='price', nbins=20, title='Distribución de precios de zapatillas',
-                        labels={'price': 'Price', 'count': 'Density'},
-                        color_discrete_sequence=golden_color)
-        st.plotly_chart(fig)
-
-    def show_price_review_scatter(data):
-        fig = px.scatter(data, x='price', y='review', title='Relación entre precio y review score',
-                        labels={'price': 'Price', 'review': 'Review Score'},
-                        color_discrete_sequence=golden_color)
-        st.plotly_chart(fig)
-
-    def show_ordered_review_distribution(data):
-        ordered_review_counts = data['review'].value_counts().sort_index()
-        fig = px.bar(x=ordered_review_counts.index, y=ordered_review_counts.values,
-                    title='Distribución de reviews',
-                    labels={'x': 'Review Score', 'y': 'Count'},
-                    color_discrete_sequence=golden_color)
-        st.plotly_chart(fig)
-
-    def show_top_brands(data):
-        top_brands = data['brand'].value_counts().nlargest(10)
-        golden_color = ['#FFD700'] * len(top_brands)  
-        fig = px.bar(x=top_brands.index, y=top_brands.values,
-                    title='Top 10 marcas con más publicaciones',
-                    labels={'x': 'Marca', 'y': 'Número de productos publicados'},
-                    color_discrete_sequence=golden_color)
-        fig.update_layout(xaxis=dict(tickangle=45, tickmode='array', tickvals=top_brands.index, ticktext=top_brands.index))
-        st.plotly_chart(fig)
-
+    # importo la funcion sql que hace calcula pct de crecimiento
+    monthly_sales_growth, monthly_sales_comparison = create_and_query_sql_analytics(data_amazon)
+    
+    #uso las funciones importadas del archivo graficos    
 
     if __name__ == '__main__':
         st.title('Análisis exploratorio de datos')
@@ -414,7 +178,7 @@ elif selected == 'Sistema de recomendación':
         st.write("Ayuda a personalizar el contenido. En Netflix, la mayoría de las películas vistas son a través de recomendaciones.")
 
         st.header("Tipos de recomendaciones")
-        st.image("recommenders.png")
+        st.image(r"imagenes\recommenders.png")
         #st.write("Principalmente hay 6 tipos de sistemas de recomendación:")
         #st.markdown("- **Sistemas basados en popularidad:** Funcionan recomendando elementos vistos y comprados por la mayoría de las personas y que tienen altas calificaciones. No son recomendaciones personalizadas.")
         #st.markdown("- **Modelo basado en clasificación:** Funciona comprendiendo las características del usuario y aplicando el algoritmo de clasificación para decidir si el usuario está interesado o no en el producto.")
@@ -501,8 +265,8 @@ elif selected == 'Sistema de recomendación':
         st.markdown("""A través de una función que recibe el id del usuario se obtienen los usuarios más similares. 
                     Se utiliza cosine_similarity para calcular el grado de similitud.""")
         
-        st.image('cosine-similarity-vectors.jpg')
-        st.image('similarity-formula.png')
+        st.image(r'imagenes\cosine-similarity-vectors.jpg')
+        st.image(r'imagenes\similarity-formula.png')
 
         st.markdown("""Luego se utiliza el usuario más similar para encontrar cuáles fueron sus productos favoritos (mejor rating).""")
 
@@ -596,8 +360,8 @@ elif selected == 'Sistema de recomendación':
                 - (V^T) es la traspuesta de la matriz unitaria (de productos).
                 """)
         
-        st.image('SVD_Expl.jpg')
-        st.image('svd_UxV.png')
+        st.image(r'imagenes\SVD_Expl.jpg')
+        st.image(r'imagenes\svd_UxV.png')
 
 
         final_ratings_sparse = csr_matrix(matriz_ratings_final.values)
@@ -751,11 +515,10 @@ elif selected == 'Chatbot MELI':
                 
                     with st.spinner(f"Buscando...🤔"):
                         user_input_string = " ".join(st.session_state.user_inputs)
-                        scraper = Scraper(user_input_string)
-                        scraper.scraping()
-                        prod1 = scraper.data_recom.iloc[0]
-                        prod2 = scraper.data_recom.iloc[1]
-                        prod3 = scraper.data_recom.iloc[2]
+                        scraped_data = scrape_and_return_data(user_input_string)
+                        prod1 = scraped_data.iloc[0]
+                        prod2 = scraped_data.iloc[1]
+                        prod3 = scraped_data.iloc[2]
                         
                         st.session_state.messages.append({"role": "assistant", "content": f"{prod1['title']} -- ${prod1['price']} -- {prod1['post link']}"})
                         st.session_state.messages.append({"role": "assistant", "content": f"{prod2['title']} -- ${prod2['price']} -- {prod2['post link']}"})
