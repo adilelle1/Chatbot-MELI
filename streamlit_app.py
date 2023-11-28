@@ -30,7 +30,7 @@ import plotly.colors as colors
 data_amazon = pd.read_csv(r'amazon_sales.csv')
 
 # dataset MELI
-data_meli = pd.read_csv('mercadolibre_scraped_data.csv', on_bad_lines='skip', delimiter=';')
+data_meli = pd.read_csv('meli.csv', on_bad_lines='skip', delimiter=';')
 data_meli.drop(columns='Unnamed: 0', inplace=True)
 
 # dataset para sistema de recomendacion
@@ -265,14 +265,10 @@ if selected == 'Home':
 
     st.header('Dataset')
     st.write('Los conjuntos de datos utilizados para este proyecto son 3:')
-    st.markdown('- Amazon sales 2019-21 = evolucion de las ventas de amazon en Reino Unido')
+    st.markdown('- Amazon sales 2019-21 : evolución de las ventas de Amazon en Reino Unido')
     st.markdown('- Ratings: set de datos de ratings de productos por usuarios')
     st.markdown('- Mercado Libre: Web Scraping')
-    st.markdown('[Github](https://www.goodreads.com/)')
-    #st.dataframe(data_recom.head())
-    #st.dataframe(data_ratings.head())
-
-
+    st.markdown('Se pueden encontrar en el repositorio del proyecto: [Github Chatbot Meli](https://github.com/adilelle1/Chatbot-MELI)')
     
 
     
@@ -416,17 +412,18 @@ elif selected == 'Sistema de recomendación':
         st.write("Puede ayudar al usuario a encontrar el producto adecuado.")
         st.write("Puede aumentar la participación del usuario. Por ejemplo, hay un 40% más de clics en las noticias de Google debido a las recomendaciones.")
         st.write("Ayuda a los proveedores de productos a entregar los artículos al usuario adecuado. En Amazon, el 35% de los productos se venden gracias a las recomendaciones.")
-        st.write("Ayuda a personalizar el contenido. En Netflix, la mayoría de las películas alquiladas son a través de recomendaciones.")
+        st.write("Ayuda a personalizar el contenido. En Netflix, la mayoría de las películas vistas son a través de recomendaciones.")
 
         st.header("Tipos de recomendaciones")
-        st.write("Principalmente hay 6 tipos de sistemas de recomendación:")
-        st.markdown("- **Sistemas basados en popularidad:** Funcionan recomendando elementos vistos y comprados por la mayoría de las personas y que tienen altas calificaciones. No son recomendaciones personalizadas.")
-        st.markdown("- **Modelo basado en clasificación:** Funciona comprendiendo las características del usuario y aplicando el algoritmo de clasificación para decidir si el usuario está interesado o no en el producto.")
-        st.markdown("- **Recomendaciones basadas en contenido:** Se basa en la información sobre el contenido del artículo en lugar de en las opiniones del usuario. La idea principal es que si al usuario le gusta un artículo, entonces le gustará el 'otro' artículo similar.")
-        st.markdown("- **Filtrado colaborativo:** Se basa en la suposición de que a las personas les gustan productos similares a otros que ya les gustaron, y productos que son valorados por otras personas con gustos similares. \
-                    Principalmente hay dos tipos: \n\t\ta) Usuario-Usuario \n\t\tb) Artículo-Artículo")
-        st.markdown("- **Enfoques híbridos:** Este enfoque combina filtrado colaborativo, filtrado basado en contenido y otros enfoques.")
-        st.markdown("- **Minería de reglas de asociación:** Las reglas de asociación capturan las relaciones entre elementos basadas en sus patrones de co-ocurrencia en las transacciones.")
+        st.image("recommenders.png")
+        #st.write("Principalmente hay 6 tipos de sistemas de recomendación:")
+        #st.markdown("- **Sistemas basados en popularidad:** Funcionan recomendando elementos vistos y comprados por la mayoría de las personas y que tienen altas calificaciones. No son recomendaciones personalizadas.")
+        #st.markdown("- **Modelo basado en clasificación:** Funciona comprendiendo las características del usuario y aplicando el algoritmo de clasificación para decidir si el usuario está interesado o no en el producto.")
+        #st.markdown("- **Recomendaciones basadas en contenido:** Se basa en la información sobre el contenido del artículo en lugar de en las opiniones del usuario. La idea principal es que si al usuario le gusta un artículo, entonces le gustará el 'otro' artículo similar.")
+        #st.markdown("- **Filtrado colaborativo:** Se basa en la suposición de que a las personas les gustan productos similares a otros que ya les gustaron, y productos que son valorados por otras personas con gustos similares. \
+        #            Principalmente hay dos tipos: \n\t\ta) Usuario-Usuario \n\t\tb) Artículo-Artículo")
+        #st.markdown("- **Enfoques híbridos:** Este enfoque combina filtrado colaborativo, filtrado basado en contenido y otros enfoques.")
+        #st.markdown("- **Minería de reglas de asociación:** Las reglas de asociación capturan las relaciones entre elementos basadas en sus patrones de co-ocurrencia en las transacciones.")
 
         st.header("Información del dataset:")
         st.write("A modo de ejemplo, se utiliza un conjunto de datos de pocas dimensiones donde se tiene información de usuarios y la forma en que 'ratearon' diferentes productos.")
