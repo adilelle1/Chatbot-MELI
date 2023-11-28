@@ -30,8 +30,7 @@ import plotly.colors as colors
 data_amazon = pd.read_csv(r'amazon_sales.csv')
 
 # dataset MELI
-data_meli = pd.read_csv('meli.csv', on_bad_lines='skip', delimiter=';')
-data_meli.drop(columns='Unnamed: 0', inplace=True)
+data_meli = pd.read_csv('meli.csv')
 
 # dataset para sistema de recomendacion
 data_recom = pd.read_csv('ratings_Electronics_corto.csv') 
