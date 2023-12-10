@@ -273,6 +273,7 @@ elif selected == 'Sistema de recomendación':
         matriz_ratings_final = data_recom.pivot(index = 'user_id', columns ='prod_id', values = 'rating').fillna(0)
         matriz_ratings_final['user_index'] = np.arange(0, matriz_ratings_final.shape[0])
         matriz_ratings_final.set_index(['user_index'], inplace=True)
+        
         def similar_users(user_index, interactions_matrix):
             similarity = []
 
@@ -284,7 +285,7 @@ elif selected == 'Sistema de recomendación':
                 similarity.append((user, sim))
 
             similarity.sort(key=lambda x: x[1], reverse=True)
-            # Extract user index and similarity score from the sorted list
+            # Extraer el user index y el similarity score de la lista ordenada
             most_similar_users = [tup[0] for tup in similarity]#extraer el usuario de la tupla
             similarity_score = [tup[1] for tup in similarity]# extraer el score de similitud
             # quito de la lista el mismo usuario que busque
@@ -309,6 +310,7 @@ elif selected == 'Sistema de recomendación':
             except IndexError:
                 st.warning('Por favor ingresa un numero entero.')
 
+
         #Usando los resultados de similitud de usuario creamos una funcion de recomendacion de productos
         def recommendations(user_index, num_of_products, interactions_matrix):
             # Uso la funcion de usuarios similares, tomo el primero
@@ -327,6 +329,7 @@ elif selected == 'Sistema de recomendación':
                     break
             return recommendations[:num_of_products]
         
+               
         
         if user_id_input  != '': 
             try:
@@ -371,9 +374,11 @@ elif selected == 'Sistema de recomendación':
         preds_df = pd.DataFrame(abs(users_predicted_ratings), columns = matriz_ratings_final.columns)
         preds_df.head()
         preds_matrix = csr_matrix(preds_df.values)
-        def recommend_items(user_index, interactions_matrix, preds_matrix, num_recommendations):
+        
+        
+        def recommend_items(user_index, final_ratings_sparse, preds_matrix):
             # Tomo ratings reales y predichos de las matrices
-            user_ratings = interactions_matrix[user_index,:].toarray().reshape(-1)
+            user_ratings = final_ratings_sparse[user_index,:].toarray().reshape(-1)
             user_predictions = preds_matrix[user_index,:].toarray().reshape(-1)
 
             # Creo un df con ratings reales y predichos en columnas
@@ -387,13 +392,13 @@ elif selected == 'Sistema de recomendación':
             # Recomendando en base a la prediccion de los productos mejor rankeados para un usuario
             temp = temp.sort_values('user_rating_predictions',ascending=False) # ordenar por prediccion descendiente 
             return temp
-        
+
         user_id_2  = st.text_input('Ingresa el id del usuario', value='', key='id_usuario_prediccion')
 
         if user_id_2  != '': 
             try:
                 user_id_2_int = int(user_id_2)
-                prod_recomen_pred_rating = recommend_items(user_id_2_int, final_ratings_sparse, preds_matrix,5)
+                prod_recomen_pred_rating = recommend_items(user_id_2_int, final_ratings_sparse, preds_matrix)
                 st.write('**Productos recomendados en base a predicción de rating:**')
                 st.dataframe(prod_recomen_pred_rating['user_rating_predictions'].head(10))
                 st.subheader("Evaluación de la predicción")
@@ -449,6 +454,7 @@ elif selected == 'Chatbot MELI':
                 user_input.append(prompt)
 
         # Initialize questions 
+
         sales_questions = [
             "Hola! Soy Marquitos-G 😎, qué producto estás buscando?",
             "Qué tipo de zapatillas estás buscando? (running, futbol, tenis, basquet, etc.)",
